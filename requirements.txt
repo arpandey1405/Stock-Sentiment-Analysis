@@ -1,0 +1,8 @@
+pandas>=1.0
+scikit-learn>=1.0
+jupyter
+
+# Optional but useful for working with notebooks
+ipykernel
+
+# Exact versions can be pinned if needed for reproducibility

@@ -1,2 +1,113 @@
-# Stock-Sentiment-Analysis
-This repository implements stock sentiment analysis using daily news headlines.
+# Stock Sentiment Analysis using News Headlines
+
+This repository demonstrates a simple pipeline to predict stock-market direction using daily news headlines.
+
+The project is implemented as a Jupyter notebook (`Stock Sentiment Analysis.ipynb`) and uses a dataset of daily headlines (`Data.csv`). The notebook shows a straightforward NLP workflow: cleaning headlines, creating a bag-of-words representation (bigrams), training a Random Forest classifier, and evaluating performance on a time-based train/test split.
+
+## Contents
+
+- `Stock Sentiment Analysis.ipynb` — Jupyter notebook with the full analysis and runnable code cells.
+- `Data.csv` — dataset containing the date, target label, and up to 25 headlines per day (columns `Top1`..`Top25`).
+- `README.md` — this file.
+
+## Dataset
+
+The dataset is a CSV with the following important columns:
+
+- `Date` — date of the headlines (format: YYYY-MM-DD).
+- `Label` — binary target used for supervised learning. (The notebook treats this as the prediction target; check `Data.csv` or the dataset source for exact semantic mapping of 0/1 to market movement.)
+- `Top1` .. `Top25` — up to 25 short news headlines aggregated for the given date.
+
+Example (first row):
+
+Date,Label,Top1,Top2,...,Top25
+
+The notebook concatenates the Top1..Top25 columns into a single document per row.
+
+## Approach / Methodology
+
+High-level pipeline used in the notebook:
+
+1. Load dataset with pandas.
+2. Create a train/test split using dates (train: dates < 2015-01-01, test: dates > 2014-12-31). This preserves temporal ordering and avoids look-ahead leakage.
+3. Keep only the 25 headline columns for text processing. Non-alphabet characters are removed and text is lower-cased.
+4. Concatenate the 25 headlines into a single string per day.
+5. Vectorize text using scikit-learn's `CountVectorizer` with bigrams (`ngram_range=(2,2)`). This produces a bag-of-bigrams representation.
+6. Train a `RandomForestClassifier` (200 trees, entropy criterion) on the vectorized training data.
+7. Transform the test headlines with the same vectorizer and evaluate predictions using accuracy, classification report and confusion matrix.
+
+Notes and reasoning:
+- Using a time-based split is important for financial data to avoid look-ahead bias.
+- Bigrams can capture short phrases that single tokens miss (for example, "market up", "shares fall").
+- Random Forests are robust, quick to train, and a reasonable baseline for sparse vector inputs.
+
+## Key Notebook Parameters
+
+- Vectorizer: CountVectorizer(ngram_range=(2,2)) — bag-of-bigrams.
+- Classifier: RandomForestClassifier(n_estimators=200, criterion='entropy').
+- Train/test split: Date-based (pre/post 2015-01-01 in the notebook).
+
+## How to run
+
+Prerequisites: Python 3.8+ and the packages listed in `requirements.txt` (see below).
+
+1. (Optional) Create and activate a virtual environment:
+
+```powershell
+python -m venv .venv; .\.venv\Scripts\Activate.ps1
+```
+
+2. Install dependencies:
+
+```powershell
+pip install -r requirements.txt
+```
+
+3. Start Jupyter and open the notebook:
+
+```powershell
+jupyter notebook "Stock Sentiment Analysis.ipynb"
+```
+
+4. Run the notebook cells in order. The notebook is small and should run in a few minutes on a typical laptop (CPU).
+
+## Expected outputs
+
+- Training progress of the Random Forest (silent in the notebook, training completes quickly).
+- Printed confusion matrix and accuracy score for the test set.
+- Classification report (precision/recall/f1-score) printed to the output.
+
+## Recommendations & Next steps
+
+This repository provides a clear baseline. If you want to improve or extend it, consider:
+
+- Using TF-IDF instead of raw counts (TfidfVectorizer).
+- Trying different n-gram ranges (unigrams, bigrams, trigrams, or mixtures).
+- Applying more advanced text preprocessing (stop-word removal, lemmatization, spelling normalization).
+- Using modern NLP models (word embeddings, transformer-based sentence encoders) and a simple classifier on top.
+- Performing cross-validation with time-series-aware folds (e.g., expanding windows) for more robust performance estimates.
+- Calibrating the classifier and analyzing feature importances (or using interpretable models) to understand which phrases drive predictions.
+
+## Dependencies
+
+See `requirements.txt` for the list of required Python packages. At minimum the notebook uses:
+
+- pandas
+- scikit-learn
+- jupyter (for the notebook)
+
+## Notes, assumptions & provenance
+
+- The notebook assumes the `Label` column is a binary target; check the dataset source if you need the exact interpretation of 0 vs 1 (e.g., up/down market movement).
+- This repository appears to be based on a commonly used educational dataset of news headlines and market movement. If you reuse or publish results, please cite the original dataset source.
+
+## License
+
+This repository inherits the top-level `LICENSE` file. Please consult it for terms.
+
+## Contact
+
+If you have questions or improvements, open an issue or submit a pull request.
+
+---
+Generated by analysis of `Stock Sentiment Analysis.ipynb` and `Data.csv`.
